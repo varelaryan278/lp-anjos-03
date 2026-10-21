@@ -30,7 +30,7 @@ export const WhatsappFab = ({ message }: { message: string }) => {
                 >
                   <span>
                     <span className="block font-medium">{store.name}</span>
-                    <span className="block text-xs text-navy-700">{store.city}</span>
+                    <span className="block text-xs text-navy-700">{store.seller ? `${store.city} · ${store.seller}` : store.city}</span>
                   </span>
                   <WhatsappIcon className="size-5 text-whatsapp" />
                 </a>

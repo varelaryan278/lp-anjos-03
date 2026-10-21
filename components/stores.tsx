@@ -42,7 +42,7 @@ export const Stores = () => (
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-whatsapp px-5 py-3 text-sm font-semibold text-navy-950 transition-opacity hover:opacity-90"
               >
                 <WhatsappIcon className="size-4" />
-                Chamar no WhatsApp
+                {store.seller ? `Falar com ${store.seller}` : "Chamar no WhatsApp"}
               </a>
               <a
                 href={mapsUrl(store)}

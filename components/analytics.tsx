@@ -5,33 +5,39 @@ import { useEffect } from "react"
 
 declare global {
   interface Window {
-    dataLayer?: Record<string, unknown>[]
+    dataLayer?: unknown[]
+    gtag?: (...args: unknown[]) => void
   }
 }
 
-const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
+const ADS_ID = "AW-529378621"
+const CONVERSION_LABEL = process.env.NEXT_PUBLIC_ADS_CONVERSION_LABEL
+const CONVERSION_TRACKS = ["whatsapp", "phone"]
 
 export const Analytics = () => {
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       const el = (e.target as HTMLElement).closest<HTMLElement>("[data-track]")
-      if (!el) return
-      window.dataLayer = window.dataLayer ?? []
-      window.dataLayer.push({
-        event: `${el.dataset.track}_click`,
+      if (!el || !window.gtag) return
+      const track = el.dataset.track ?? ""
+      window.gtag("event", track === "whatsapp" ? "inicio_conversa" : `${track}_click`, {
         store: el.dataset.store,
         placement: el.dataset.placement,
       })
+      if (CONVERSION_LABEL && CONVERSION_TRACKS.includes(track)) {
+        window.gtag("event", "conversion", { send_to: `${ADS_ID}/${CONVERSION_LABEL}` })
+      }
     }
     document.addEventListener("click", onClick)
     return () => document.removeEventListener("click", onClick)
   }, [])
 
-  if (!GTM_ID) return null
-
   return (
-    <Script id="gtm" strategy="afterInteractive">
-      {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${GTM_ID}');`}
-    </Script>
+    <>
+      <Script src={`https://www.googletagmanager.com/gtag/js?id=${ADS_ID}`} strategy="afterInteractive" />
+      <Script id="gtag-init" strategy="afterInteractive">
+        {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${ADS_ID}');`}
+      </Script>
+    </>
   )
 }
